@@ -142,7 +142,7 @@ export function useChatMain(options: UseChatMainOptions) {
     flushPersistUserConfig,
     persistUserConfig,
     isConfigLoaded,
-    markConfigLoaded,
+    applyLoadedConfig,
     togglePin,
     unpin,
     hasPersistTimer,
@@ -349,49 +349,7 @@ export function useChatMain(options: UseChatMainOptions) {
     }
 
     try {
-      const config = await client.loadUserConfig()
-      if (config.theme) {
-        setSessionTheme(config.theme)
-      }
-      if (config.pins && Array.isArray(config.pins)) {
-        pinnedIds.value = config.pins
-      }
-      if (config.modelByHarness && typeof config.modelByHarness === 'object') {
-        modelByHarness.value = config.modelByHarness
-      }
-      if (config.fontScale) {
-        fontScale.value = config.fontScale
-        applyFontScale(config.fontScale)
-      }
-      const hasSpeechSynthesis = typeof window !== 'undefined' && 'speechSynthesis' in window
-      if (config.ttsEngine === 'device') {
-        ttsEngine.value = 'server'
-        tts.setEngine('server')
-      } else if (config.ttsEngine === 'browser' && !hasSpeechSynthesis) {
-        ttsEngine.value = 'server'
-        tts.setEngine('server')
-      } else if (config.ttsEngine) {
-        ttsEngine.value = config.ttsEngine
-        tts.setEngine(config.ttsEngine)
-      } else {
-        ttsEngine.value = 'server'
-        tts.setEngine('server')
-      }
-      if (config.ttsVoice !== undefined) {
-        ttsVoice.value = config.ttsVoice
-      }
-      if (config.ttsSpeaker !== undefined) {
-        ttsSpeaker.value = config.ttsSpeaker
-      }
-      if (config.ttsStyle !== undefined) {
-        ttsStyle.value = config.ttsStyle
-      }
-      if (typeof config.autoRead === 'boolean') {
-        autoRead.value = config.autoRead
-      }
-      // Saving is allowed only after a successful load. After a failure nothing is persisted in this
-      // session (the stored config would be overwritten with defaults) until a retry of the load succeeds.
-      markConfigLoaded()
+      applyLoadedConfig(await client.loadUserConfig())
     } catch {
       // Config loading failed: keep defaults, do not call markConfigLoaded().
     }
@@ -559,7 +517,7 @@ export function useChatMain(options: UseChatMainOptions) {
 
   function handleModelChange(payload: { harnessId: string, modelId: string | null }) {
     modelByHarness.value[payload.harnessId] = payload.modelId
-    persistUserConfig()
+    persistUserConfig('modelByHarness')
   }
 
   const visibleMessages = computed(() => {
@@ -754,7 +712,7 @@ export function useChatMain(options: UseChatMainOptions) {
     () => chatSession.theme.value,
     () => {
       // The theme set by the host init before the config load is not a user change.
-      if (isConfigLoaded.value) persistUserConfig()
+      if (isConfigLoaded.value) persistUserConfig('theme')
     },
   )
 

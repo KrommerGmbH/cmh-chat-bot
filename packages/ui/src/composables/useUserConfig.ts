@@ -1,8 +1,11 @@
-import type { FontScale, TtsEngineType } from '@cmh/chat-core'
-import { chatSession, type ChatClient } from '@cmh/chat-core'
+import type { FontScale, TtsEngineType, UserConfigData } from '@cmh/chat-core'
+import { chatSession, setSessionTheme, type ChatClient } from '@cmh/chat-core'
 import { applyFontScale as writeFontScale } from '../appearance'
 import type { TtsServiceManager } from '../tts/tts'
 import { ref } from 'vue'
+
+/** Config keys the user can change; used to protect values changed while the initial load was still in flight. */
+export type UserConfigKey = 'theme' | 'pins' | 'modelByHarness' | 'fontScale' | 'ttsEngine' | 'ttsVoice' | 'ttsSpeaker' | 'ttsStyle' | 'autoRead'
 
 export interface UserConfigOptions {
   client: Pick<ChatClient, 'saveUserConfig'>
@@ -34,7 +37,7 @@ export function useUserConfig(options: UserConfigOptions) {
   function handleFontScaleChange(scale: FontScale) {
     fontScale.value = scale
     applyFontScale(scale)
-    void persistUserConfig()
+    void persistUserConfig('fontScale')
   }
 
   function handleTtsEngineChange(engine: TtsEngineType) {
@@ -42,22 +45,22 @@ export function useUserConfig(options: UserConfigOptions) {
     ttsEngine.value = engine
     ttsService.setEngine(engine)
     options.onLoadVoices?.()
-    persistUserConfig()
+    persistUserConfig('ttsEngine')
   }
 
   function handleTtsVoiceChange(voice: string | null) {
     ttsVoice.value = voice
-    persistUserConfig()
+    persistUserConfig('ttsVoice')
   }
 
   function handleTtsSpeakerChange(speaker: string | null) {
     ttsSpeaker.value = speaker
-    persistUserConfig()
+    persistUserConfig('ttsSpeaker')
   }
 
   function handleTtsStyleChange(style: string | null) {
     ttsStyle.value = style
-    persistUserConfig()
+    persistUserConfig('ttsStyle')
   }
 
   function handleAutoReadChange(val: boolean) {
@@ -67,7 +70,7 @@ export function useUserConfig(options: UserConfigOptions) {
     } else {
       options.onStopTts?.()
     }
-    persistUserConfig()
+    persistUserConfig('autoRead')
   }
 
   let persistTimer: ReturnType<typeof setTimeout> | null = null
@@ -75,16 +78,68 @@ export function useUserConfig(options: UserConfigOptions) {
   // Nothing may be saved before the initial loadUserConfig() has settled: a save with default values
   // would overwrite the stored config of the user (race with the theme watcher and early clicks).
   const isConfigLoaded = ref(false)
-  let hasChangeBeforeLoad = false
+  /** Keys the user changed before the load settled: the server value must not overwrite them. */
+  const changedBeforeLoad = new Set<UserConfigKey>()
 
   /** Call once the initial load succeeded (never after a failed load: defaults would overwrite the stored config). Persists once when the user changed something before. */
   function markConfigLoaded() {
     if (isConfigLoaded.value) return
     isConfigLoaded.value = true
-    if (hasChangeBeforeLoad) {
-      hasChangeBeforeLoad = false
-      persistUserConfig()
+    // Saves the merged state (server values + the user's early changes) once.
+    if (changedBeforeLoad.size > 0) {
+      changedBeforeLoad.clear()
+      scheduleSave()
     }
+  }
+
+  /**
+   * Apply the result of the initial load. Keys the user changed while the load was in flight keep the user's value;
+   * markConfigLoaded() then saves the merged state once. Call only after a successful load.
+   */
+  function applyLoadedConfig(config: UserConfigData) {
+    if (config.theme) {
+      setSessionTheme(config.theme)
+    }
+    if (config.pins && Array.isArray(config.pins) && !changedBeforeLoad.has('pins')) {
+      pinnedIds.value = config.pins
+    }
+    if (config.modelByHarness && typeof config.modelByHarness === 'object' && !changedBeforeLoad.has('modelByHarness')) {
+      modelByHarness.value = config.modelByHarness
+    }
+    if (config.fontScale && !changedBeforeLoad.has('fontScale')) {
+      fontScale.value = config.fontScale
+      applyFontScale(config.fontScale)
+    }
+    if (!changedBeforeLoad.has('ttsEngine')) {
+      const hasSpeechSynthesis = typeof window !== 'undefined' && 'speechSynthesis' in window
+      if (config.ttsEngine === 'device') {
+        ttsEngine.value = 'server'
+        ttsService.setEngine('server')
+      } else if (config.ttsEngine === 'browser' && !hasSpeechSynthesis) {
+        ttsEngine.value = 'server'
+        ttsService.setEngine('server')
+      } else if (config.ttsEngine) {
+        ttsEngine.value = config.ttsEngine
+        ttsService.setEngine(config.ttsEngine)
+      } else {
+        ttsEngine.value = 'server'
+        ttsService.setEngine('server')
+      }
+    }
+    if (config.ttsVoice !== undefined && !changedBeforeLoad.has('ttsVoice')) {
+      ttsVoice.value = config.ttsVoice
+    }
+    if (config.ttsSpeaker !== undefined && !changedBeforeLoad.has('ttsSpeaker')) {
+      ttsSpeaker.value = config.ttsSpeaker
+    }
+    if (config.ttsStyle !== undefined && !changedBeforeLoad.has('ttsStyle')) {
+      ttsStyle.value = config.ttsStyle
+    }
+    if (typeof config.autoRead === 'boolean' && !changedBeforeLoad.has('autoRead')) {
+      autoRead.value = config.autoRead
+    }
+    // Saving is allowed only after a successful load (never after a failure: defaults would overwrite the stored config).
+    markConfigLoaded()
   }
 
   function flushPersistUserConfig() {
@@ -106,11 +161,15 @@ export function useUserConfig(options: UserConfigOptions) {
     })
   }
 
-  function persistUserConfig() {
+  function persistUserConfig(key: UserConfigKey) {
     if (!isConfigLoaded.value) {
-      hasChangeBeforeLoad = true
+      changedBeforeLoad.add(key)
       return
     }
+    scheduleSave()
+  }
+
+  function scheduleSave() {
     if (persistTimer) {
       clearTimeout(persistTimer)
     }
@@ -127,14 +186,14 @@ export function useUserConfig(options: UserConfigOptions) {
     } else {
       pinnedIds.value.splice(index, 1)
     }
-    persistUserConfig()
+    persistUserConfig('pins')
   }
 
   async function unpin(id: string) {
     const index = pinnedIds.value.indexOf(id)
     if (index !== -1) {
       pinnedIds.value.splice(index, 1)
-      persistUserConfig()
+      persistUserConfig('pins')
     }
   }
 
@@ -158,6 +217,7 @@ export function useUserConfig(options: UserConfigOptions) {
     persistUserConfig,
     isConfigLoaded,
     markConfigLoaded,
+    applyLoadedConfig,
     togglePin,
     unpin,
     hasPersistTimer: () => Boolean(persistTimer),

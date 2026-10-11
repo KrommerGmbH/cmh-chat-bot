@@ -19,7 +19,7 @@ describe('useUserConfig load guard', () => {
 
   it('saves nothing before the initial load settled', () => {
     const { config, saveUserConfig } = setup()
-    config.persistUserConfig()
+    config.persistUserConfig('autoRead')
     config.flushPersistUserConfig()
     vi.advanceTimersByTime(1000)
     expect(saveUserConfig).not.toHaveBeenCalled()
@@ -61,5 +61,56 @@ describe('useUserConfig load guard', () => {
     expect(saveUserConfig).not.toHaveBeenCalled()
     vi.advanceTimersByTime(400)
     expect(saveUserConfig).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('useUserConfig applyLoadedConfig', () => {
+  const server = {
+    theme: 'dark' as const,
+    pins: ['p1'],
+    modelByHarness: { h: 'm1' },
+    fontScale: 'S' as const,
+    ttsEngine: 'server' as const,
+    ttsVoice: 'sv',
+    ttsSpeaker: 'ss',
+    ttsStyle: 'st',
+    autoRead: true,
+  }
+
+  beforeEach(() => {
+    vi.useFakeTimers()
+  })
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('keeps a font scale changed before the load, applies the other server keys, saves once with the merged config', () => {
+    const { config, saveUserConfig } = setup()
+    config.handleFontScaleChange('L')
+    config.applyLoadedConfig(server)
+    vi.advanceTimersByTime(1000)
+    expect(config.fontScale.value).toBe('L')
+    expect(config.pinnedIds.value).toEqual(['p1'])
+    expect(config.ttsVoice.value).toBe('sv')
+    expect(config.autoRead.value).toBe(true)
+    expect(saveUserConfig).toHaveBeenCalledTimes(1)
+    expect(saveUserConfig.mock.calls[0]![0]).toMatchObject({ fontScale: 'L', pins: ['p1'], ttsVoice: 'sv', autoRead: true })
+  })
+
+  it('applies all server values and saves nothing when the user changed nothing', () => {
+    const { config, saveUserConfig } = setup()
+    config.applyLoadedConfig(server)
+    vi.advanceTimersByTime(1000)
+    expect(config.fontScale.value).toBe('S')
+    expect(config.modelByHarness.value).toEqual({ h: 'm1' })
+    expect(saveUserConfig).not.toHaveBeenCalled()
+  })
+
+  it('a failed load never reaches applyLoadedConfig: user changes stay unsaved', () => {
+    const { config, saveUserConfig } = setup()
+    config.handleFontScaleChange('L')
+    vi.advanceTimersByTime(1000)
+    expect(config.isConfigLoaded.value).toBe(false)
+    expect(saveUserConfig).not.toHaveBeenCalled()
   })
 })
