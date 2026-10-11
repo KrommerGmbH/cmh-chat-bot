@@ -1,0 +1,17 @@
+{
+  "name": "cmh-chat-bot",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Shared AI chat library (@cmh/chat-*) for the Shopware admin, the AiOAi desktop app, the flow canvas and the mobile app.",
+  "license": "MIT",
+  "packageManager": "pnpm@10.25.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "typecheck": "pnpm -r run typecheck",
+    "test": "pnpm -r run test",
+    "dev": "pnpm --filter @cmh/chat-playground dev",
+    "build:bundle": "pnpm --filter @cmh/chat-standalone-bundle build:admin && pnpm --filter @cmh/chat-standalone-bundle build:relative"
+  }
+}

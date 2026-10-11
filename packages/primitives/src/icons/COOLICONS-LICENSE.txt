@@ -1,0 +1,16 @@
+Icon attribution
+
+The icon path data in coolicons.generated.ts comes from coolicons.
+
+- Author: Kryston Schwarze
+- Repository: https://github.com/krystonschwarze/coolicons
+- Commit used: 1a92717b6050b8256465e09a285238a9fa4a1b45
+- Licence: Creative Commons Attribution 4.0 (CC BY 4.0) - https://creativecommons.org/licenses/by/4.0/
+- Basis: the repository README "License" section: "You can use coolicons for your personal and commercial projects. The icons are free to download and are licensed under CC 4.0." The repository has no separate LICENSE file.
+
+Changes made (CC BY 4.0 requires a change notice)
+
+- The path values (d) are used unchanged. ChatIcon draws them with a default stroke width of 1.5 (the original is 2).
+- The "duotone" and "duocolor" variants do not exist in the free coolicons set. They are our own substitute: the same line drawn again as a faint layer behind it. They are not the drawings of the paid "coolicons PRO".
+
+Please keep a line such as "Icons by coolicons (Kryston Schwarze), CC BY 4.0" in the about screen or README of any app that ships these icons.

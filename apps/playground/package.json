@@ -1,0 +1,34 @@
+{
+  "name": "@cmh/chat-playground",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Dev playground with demo data (no server needed).",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit -p tsconfig.json && vite build",
+    "preview": "vite preview",
+    "typecheck": "vue-tsc --noEmit -p tsconfig.json",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@cmh/chat-core": "workspace:*",
+    "@cmh/chat-parts": "workspace:*",
+    "@cmh/chat-primitives": "workspace:*",
+    "@cmh/chat-ui": "workspace:*",
+    "vue": "catalog:",
+    "vue-sonner": "^2.0.9"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "catalog:",
+    "@types/node": "catalog:",
+    "@vitejs/plugin-vue": "catalog:",
+    "tailwindcss": "catalog:",
+    "tw-animate-css": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vitest": "catalog:",
+    "vue-tsc": "catalog:"
+  }
+}

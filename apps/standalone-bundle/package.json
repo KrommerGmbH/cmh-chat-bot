@@ -1,0 +1,36 @@
+{
+  "name": "@cmh/chat-standalone-bundle",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Standalone iframe bundle for the Shopware admin, the flow canvas and the mobile app.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit -p tsconfig.json && vite build",
+    "preview": "vite preview",
+    "typecheck": "vue-tsc --noEmit -p tsconfig.json",
+    "test": "vitest run --passWithNoTests",
+    "build:admin": "vue-tsc --noEmit -p tsconfig.json && vite build --base /bundles/cmhaiagent/chat-app/ --outDir dist-admin",
+    "build:relative": "vue-tsc --noEmit -p tsconfig.json && vite build --base ./ --outDir dist-relative"
+  },
+  "dependencies": {
+    "@cmh/chat-core": "workspace:*",
+    "@cmh/chat-parts": "workspace:*",
+    "@cmh/chat-primitives": "workspace:*",
+    "@cmh/chat-ui": "workspace:*",
+    "vue": "catalog:",
+    "vue-sonner": "^2.0.9"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "catalog:",
+    "@types/node": "catalog:",
+    "@vitejs/plugin-vue": "catalog:",
+    "tailwindcss": "catalog:",
+    "tw-animate-css": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vitest": "catalog:",
+    "vue-tsc": "catalog:"
+  }
+}

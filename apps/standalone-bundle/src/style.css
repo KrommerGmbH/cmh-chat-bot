@@ -1,0 +1,32 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "./assets/fonts.css";
+@import "@cmh/chat-primitives/theme.css";
+
+/* Tailwind CSS 4 does not scan node_modules: name the source-distributed packages. */
+@source "../../../packages/primitives/src";
+@source "../../../packages/parts/src";
+@source "../../../packages/ui/src";
+
+@theme inline {
+  --font-heading: var(--font-sans);
+  --font-sans: var(--font-ui);
+}
+
+:root {
+  --font-ui: "Google Sans Flex Variable", "Noto Sans KR Variable", "Malgun Gothic", "Segoe UI", sans-serif;
+}
+
+@layer base {
+  html, body, #app {
+    height: 100%;
+  }
+  h1, h2 { color: var(--text-title); }
+  h3, h4 { color: var(--text-heading); }
+  body {
+    @apply bg-background text-foreground;
+    margin: 0;
+    font-family: var(--font-ui);
+    text-rendering: optimizeLegibility;
+  }
+}
