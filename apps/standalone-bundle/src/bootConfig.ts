@@ -59,3 +59,40 @@ export function buildBootConfig(search: string, pageOrigin: string, allowedParen
     hasUsableOrigin: allowedOrigins.length > 0,
   }
 }
+
+/**
+ * Validate the `apiBaseUrl` of CMH_CHAT_INIT: an absolute http(s) URL without credentials.
+ * Query and hash are dropped and a trailing slash is removed (the client builds `base + path`). Anything else gives null.
+ */
+export function parseApiBaseUrl(value: unknown): string | null {
+  if (typeof value !== 'string') return null
+  let url: URL
+  try {
+    url = new URL(value.trim())
+  } catch {
+    return null
+  }
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') return null
+  if (url.username || url.password) return null
+  url.search = ''
+  url.hash = ''
+  return url.href.replace(/\/+$/, '')
+}
+
+/**
+ * Base URL of the API client: VITE_API_BASE if set, else (mobile channel only) the `apiBaseUrl` of a trusted
+ * CMH_CHAT_INIT, else '' (same origin). For admin and canvas the message value is ignored.
+ */
+export function resolveApiBase(channel: ChatChannel, envBase: string, initApiBaseUrl: unknown): string {
+  if (envBase) return envBase
+  if (channel !== 'mobile') return ''
+  return parseApiBaseUrl(initApiBaseUrl) ?? ''
+}
+
+/** Longest text a CMH_CHAT_SEND message may carry. */
+export const MAX_SEND_TEXT_LENGTH = 2000
+
+/** CMH_CHAT_SEND guard: a string with visible content and at most MAX_SEND_TEXT_LENGTH characters. */
+export function isAcceptableSendText(text: unknown): text is string {
+  return typeof text === 'string' && text.trim().length > 0 && text.length <= MAX_SEND_TEXT_LENGTH
+}

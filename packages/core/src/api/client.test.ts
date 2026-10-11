@@ -336,6 +336,30 @@ describe('createChatClient routes', () => {
     expect((prefixed[1]!.init.headers as Record<string, string>).Authorization).toBeUndefined()
   })
 
+  it('a function baseUrl is read on every request and the origin rule follows the current value', async () => {
+    const seen: Array<{ url: string; init: RequestInit }> = []
+    let base = ''
+    const dynamic = createChatClient({
+      baseUrl: () => base,
+      getToken: () => 'tok',
+      fetch: (async (url: string, init?: RequestInit) => {
+        seen.push({ url: String(url), init: init ?? {} })
+        return new Response('{}')
+      }) as unknown as typeof fetch,
+    })
+    base = 'https://shop.example'
+    await dynamic.fetchBootstrap()
+    expect(seen[0]!.url).toBe('https://shop.example/api/_action/cmh-ai/chat/bootstrap')
+    expect((seen[0]!.init.headers as Record<string, string>).Authorization).toBe('Bearer tok')
+    await dynamic.fetchChatFileBlob('https://evil.com/f')
+    expect((seen[1]!.init.headers as Record<string, string>).Authorization).toBeUndefined()
+    base = 'https://other.example/sub'
+    await dynamic.fetchBootstrap()
+    expect(seen[2]!.url).toBe('https://other.example/sub/api/_action/cmh-ai/chat/bootstrap')
+    await dynamic.fetchChatFileBlob('https://shop.example/f')
+    expect((seen[3]!.init.headers as Record<string, string>).Authorization).toBeUndefined()
+  })
+
   it('sendChatMessage and uploadChatFile prefer errors[0].detail, then message, then the fallback', async () => {
     const detail = setup({ errors: [{ detail: 'Detail text' }], message: 'msg' }, 422)
     await expect(detail.client.sendChatMessage('c1', 'x')).rejects.toThrow('Detail text')

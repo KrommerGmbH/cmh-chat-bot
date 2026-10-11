@@ -94,6 +94,7 @@ const {
   handleNewConversation,
   handleModelChange,
   handleSendMessage,
+  sendText,
   handleStopRun,
   copyMessageText,
   toggleTts,
@@ -110,6 +111,9 @@ const {
   forceNarrow: props.forceNarrow,
 })
 const toasterEnabled = computed(() => props.showToaster ?? props.ownsDocument)
+
+// The host (CMH_CHAT_SEND in the standalone bundle) sends text through this, like the input box would.
+defineExpose({ sendText })
 </script>
 
 <template>

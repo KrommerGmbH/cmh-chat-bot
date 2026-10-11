@@ -7,8 +7,11 @@ import type {
 } from '../types/chat'
 
 export interface ChatClientOptions {
-  /** Prefix for relative URLs. Use '' for same-origin. */
-  baseUrl: string
+  /**
+   * Prefix for relative URLs. Use '' for same-origin.
+   * A function is called on every request, so the base can be set after start-up (mobile host).
+   */
+  baseUrl: string | (() => string)
   /** Returns the current bearer token ('' = send no Authorization header). */
   getToken: () => string
   /** Custom fetch (tests, Electron). Defaults to the global fetch. */
@@ -144,7 +147,7 @@ function getPageOrigin(): string | null {
 }
 
 export function createChatClient(options: ChatClientOptions): ChatClient {
-  const { baseUrl, getToken, onError } = options
+  const { getToken, onError } = options
 
   /**
    * Resolve a request URL exactly once. Relative paths keep today's rule `baseUrl + path`;
@@ -153,6 +156,7 @@ export function createChatClient(options: ChatClientOptions): ChatClient {
    * Without a known own origin a relative path stays a plain string and counts as same-origin.
    */
   function resolveRequestUrl(input: string): { url: string, sameOrigin: boolean } {
+    const baseUrl = typeof options.baseUrl === 'function' ? options.baseUrl() : options.baseUrl
     const trimmed = input.trim()
     const joined = originOf(trimmed) !== null ? trimmed : `${baseUrl}${input}`
     const joinedIsAbsolute = originOf(joined.trim()) !== null

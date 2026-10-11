@@ -1,5 +1,7 @@
 import {
   CMH_CHAT_FLOW_CONTEXT,
+  CMH_CHAT_INIT,
+  CMH_CHAT_SEND,
   chatSession,
   connectAuth,
   createChatClient,
@@ -11,7 +13,7 @@ import {
 import { ChatCanvasDrawer, ChatMainView } from '@cmh/chat-ui'
 import { createApp, h, ref } from 'vue'
 import { toast } from 'vue-sonner'
-import { buildBootConfig } from './bootConfig'
+import { buildBootConfig, isAcceptableSendText, MAX_SEND_TEXT_LENGTH, resolveApiBase } from './bootConfig'
 import './style.css'
 
 /**
@@ -21,6 +23,10 @@ import './style.css'
  *   mode    admin | canvas | mobile   (default admin)
  *   parent  origin of the embedding page when it is not the same origin
  *   flowId  canvas only: the flow this chat belongs to
+ *
+ * Messages from the host (same trust rule):
+ *   CMH_CHAT_INIT  mobile channel only: `apiBaseUrl` (absolute http/https) becomes the API base unless VITE_API_BASE is set
+ *   CMH_CHAT_SEND  `text` (max 2,000 characters) is sent as a user message, any channel
  *
  * Trust rule: messages are accepted from the origin of this page, and from `parent` only when that
  * origin is in the build-time list VITE_ALLOWED_PARENT_ORIGINS (comma separated). A `parent`
@@ -38,8 +44,13 @@ const { channel, trustedParent, hostOrigin, allowedOrigins, hasUsableOrigin } = 
 const isEmbedded = window.parent !== window
 const flowId = ref<string | null>(params.get('flowId'))
 
+const envApiBase = String(import.meta.env.VITE_API_BASE ?? '')
+// Set by a trusted CMH_CHAT_INIT (mobile channel only), read on every request.
+let hostApiBase = ''
+const chatView = ref<{ sendText: (text: string) => Promise<void> } | null>(null)
+
 const client = createChatClient({
-  baseUrl: String(import.meta.env.VITE_API_BASE ?? ''),
+  baseUrl: () => envApiBase || hostApiBase,
   getToken: () => chatSession.token.value,
   onError: message => toast.error(message),
 })
@@ -57,6 +68,16 @@ if (isEmbedded && !hasUsableOrigin) {
     ),
   }).mount('#app')
 } else {
+  // The API base listener is added BEFORE postMessageAuth: both see the same CMH_CHAT_INIT, and the auth promise
+  // continues (and the first request may start) right after its own listener, so the base must already be set.
+  window.addEventListener('message', (event: MessageEvent) => {
+    if (event.source !== window.parent) return
+    if (!allowedOrigins.includes(event.origin)) return
+    if (event.data?.type === CMH_CHAT_INIT) {
+      hostApiBase = resolveApiBase(channel, envApiBase, event.data.apiBaseUrl)
+    }
+  })
+
   // The listener must exist before the iframe `load` event: the admin sends CMH_CHAT_INIT on load.
   const auth = isEmbedded
     ? postMessageAuth({ allowedOrigins, expectedSource: window.parent })
@@ -71,8 +92,15 @@ if (isEmbedded && !hasUsableOrigin) {
   window.addEventListener('message', (event: MessageEvent) => {
     if (event.source !== window.parent) return
     if (!allowedOrigins.includes(event.origin)) return
-    if (event.data?.type === CMH_CHAT_FLOW_CONTEXT && typeof event.data.flowId === 'string') {
-      flowId.value = event.data.flowId
+    const data = event.data
+    if (data?.type === CMH_CHAT_FLOW_CONTEXT && typeof data.flowId === 'string') {
+      flowId.value = data.flowId
+    } else if (data?.type === CMH_CHAT_SEND) {
+      if (isAcceptableSendText(data.text)) {
+        void chatView.value?.sendText(data.text)
+      } else if (typeof data.text === 'string' && data.text.length > MAX_SEND_TEXT_LENGTH) {
+        console.warn(`[cmh-chat] CMH_CHAT_SEND ignored: text is longer than ${MAX_SEND_TEXT_LENGTH} characters.`)
+      }
     }
   })
 
@@ -93,8 +121,9 @@ if (isEmbedded && !hasUsableOrigin) {
   }
 
   createApp({
-    render: () => (channel === 'canvas' && flowId.value
-      ? h(ChatCanvasDrawer, { client, host, flowId: flowId.value, ownsDocument: true })
-      : h(ChatMainView, { client, host, channel, flowId: flowId.value, ownsDocument: true })),
+    // One root component per channel: a late flow id must not remount the chat and lose its state.
+    render: () => (channel === 'canvas'
+      ? h(ChatCanvasDrawer, { ref: chatView, client, host, flowId: flowId.value, ownsDocument: true })
+      : h(ChatMainView, { ref: chatView, client, host, channel, flowId: flowId.value, ownsDocument: true })),
   }).mount('#app')
 }

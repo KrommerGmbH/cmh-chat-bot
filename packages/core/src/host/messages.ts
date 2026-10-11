@@ -21,6 +21,8 @@ export interface ChatInitMessage {
   theme?: string
   mode?: ChatViewMode
   channel?: ChatChannel
+  /** Mobile channel only: absolute http(s) URL of the API server. Ignored for admin and canvas. */
+  apiBaseUrl?: string
 }
 
 /** Host -> chat. The flow canvas tells the chat which flow is open. */

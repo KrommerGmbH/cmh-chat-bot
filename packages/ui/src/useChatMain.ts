@@ -318,6 +318,7 @@ export function useChatMain(options: UseChatMainOptions) {
   const sendError = ref<string | null>(null)
 
   let hasSignalledReady = false
+  let hasLoadedVoices = false
 
   async function initializeApp() {
     bootstrapFailed.value = false
@@ -339,6 +340,12 @@ export function useChatMain(options: UseChatMainOptions) {
           },
         )
       })
+    }
+
+    // Voices need the token and the API base of the host: load them once, after the session is ready.
+    if (!hasLoadedVoices) {
+      hasLoadedVoices = true
+      void loadVoices()
     }
 
     try {
@@ -691,6 +698,32 @@ export function useChatMain(options: UseChatMainOptions) {
     }
   }
 
+  // The latest text that arrived before a harness was available (e.g. a barcode scanned right after the page opened).
+  let pendingText: string | null = null
+  let isUnmounted = false
+
+  /**
+   * Host entry (CMH_CHAT_SEND, e.g. a scanned barcode): same path as the input box, no attachments,
+   * current harness and its model. Empty text: nothing happens. No harness yet: the latest text
+   * is kept and sent as soon as a harness is available (dropped when the view unmounts).
+   */
+  async function sendText(text: string) {
+    const content = text.trim()
+    if (!content || isUnmounted) return
+    if (!activeHarness.value) {
+      pendingText = content
+      return
+    }
+    await handleSendMessage(content)
+  }
+
+  watch(activeHarness, (harness) => {
+    if (!harness || pendingText === null) return
+    const text = pendingText
+    pendingText = null
+    void handleSendMessage(text)
+  })
+
   async function handleStopRun() {
     if (!activeConversationId.value) return
     try {
@@ -744,13 +777,14 @@ export function useChatMain(options: UseChatMainOptions) {
     }
     window.addEventListener('keydown', handleGlobalKeyDown)
     void initializeApp()
-    void loadVoices()
     if (typeof document !== 'undefined') {
       document.addEventListener('visibilitychange', handleVisibilityChange)
     }
   })
 
   onBeforeUnmount(() => {
+    isUnmounted = true
+    pendingText = null
     narrowMedia?.removeEventListener('change', handleNarrowChange)
     rootResizeObserver?.disconnect()
     rootResizeObserver = null
@@ -835,6 +869,7 @@ export function useChatMain(options: UseChatMainOptions) {
     handleNewConversation,
     handleModelChange,
     handleSendMessage,
+    sendText,
     handleStopRun,
     copyMessageText,
     toggleTts,
