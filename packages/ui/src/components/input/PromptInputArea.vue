@@ -188,7 +188,7 @@ defineExpose({
               <!-- Inside an iframe a reka Select closes when the window loses focus: use a native select there. -->
               <select
                 v-if="host.isEmbedded"
-                :value="activeHarness ? activeHarness.id : ''"
+                :value="activeHarness ? (activeHarness.id || activeHarness.agentId) : ''"
                 :disabled="props.disabled || props.isLoading"
                 :title="activeHarness ? activeHarness.name : t('selectHarness')"
                 :aria-label="activeHarness ? activeHarness.name : t('selectHarness')"
@@ -196,7 +196,8 @@ defineExpose({
                 @change="handleNativeHarnessChange"
               >
                 <option v-if="!activeHarness" value="" disabled>{{ t('selectHarness') }}</option>
-                <option v-for="h in harnesses" :key="h.id" :value="h.id">{{ h.name }}</option>
+                <!-- A harness from the server can come without its own id: the agent id identifies it then. -->
+                <option v-for="h in harnesses" :key="h.id || h.agentId" :value="h.id || h.agentId">{{ h.name }}</option>
               </select>
               <TooltipProvider v-else>
                 <Tooltip>
