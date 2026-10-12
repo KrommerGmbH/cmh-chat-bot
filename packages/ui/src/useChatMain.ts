@@ -366,7 +366,6 @@ export function useChatMain(options: UseChatMainOptions) {
 
     const DEFAULT_LOCAL_MODELS: AiModel[] = [
       { id: 'gemma4', providerCode: 'local', providerName: 'Local Engine', code: 'gemma4', label: 'Gemma 4 (Local)', free: true },
-      { id: 'laya', providerCode: 'local', providerName: 'Local Engine', code: 'laya', label: 'Laya 8B (Local)', free: true },
       { id: 'router', providerCode: 'local', providerName: 'Local Engine', code: 'router', label: 'Smart Router (Auto)', free: true },
     ]
 
@@ -394,7 +393,7 @@ export function useChatMain(options: UseChatMainOptions) {
         return
       }
       console.warn('Remote bootstrap unavailable. Falling back to Local Router and Models:', err)
-      // 서버 연결 실패 시에도 에러로 멈추지 않고 로컬 스마트 라우터 및 로컬 모델(Laya, Gemma4)로 즉시 활성화
+      // 서버 연결 실패 시에도 에러로 멈추지 않고 로컬 스마트 라우터 및 로컬 모델(Gemma4)로 즉시 활성화
       harnesses.value = [DEFAULT_LOCAL_HARNESS]
       models.value = DEFAULT_LOCAL_MODELS
       selectedHarnessId.value = DEFAULT_LOCAL_HARNESS.id

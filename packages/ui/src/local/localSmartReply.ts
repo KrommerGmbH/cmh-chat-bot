@@ -165,11 +165,11 @@ export async function generateLocalSmartReply(
     }
   }
 
-  if (/(laya|gemma|모델|llm|벤치마크|bench)/i.test(userText)) {
+  if (/(gemma|모델|llm|벤치마크|bench)/i.test(userText)) {
     const statusRes = host.getModelStatus ? await host.getModelStatus().catch(() => null) : null
     const st = statusRes?.status
     const stText = st ? `\n- **백그라운드 메모리 상태**: ${st.state} (${st.message})` : ''
-    return `🤖 **[로컬 온디바이스 모델 정보]**\n- **Laya 8B**: 다국어 의사결정 및 브라우저 액션(CLICK, TYPE_TEXT) 타겟팅 모델\n- **Gemma 4**: 경량 로컬 추론 모델${stText}\n\n앱 기동 즉시 백그라운드 CPU 메모리에 적재되어 매번 10분 대기 없이 0.2초 즉시 추론을 지원합니다.`
+    return `🤖 **[로컬 온디바이스 모델 정보]**\n- **Gemma 4**: 경량 로컬 추론 모델${stText}\n\n앱 기동 즉시 백그라운드 CPU 메모리에 적재되어 매번 10분 대기 없이 0.2초 즉시 추론을 지원합니다.`
   }
 
   // 기본 지능형 라우터 답변
