@@ -31,9 +31,9 @@ const suggestions = computed(() => [
 
 <template>
   <div class="flex flex-1 items-center justify-center p-[25px]">
-    <div class="w-full max-w-[460px] text-center -mt-[25px]">
+    <div class="w-full max-w-[560px] text-center -mt-[25px]">
       <!-- AI Emblem -->
-      <div class="mx-auto mb-[23px] grid size-14 place-items-center rounded-[17px] bg-muted text-primary shadow-[0_4px_12px_#24375806]">
+      <div class="mx-auto mb-8 grid size-14 place-items-center rounded-[17px] bg-muted text-primary shadow-[0_4px_12px_#24375806]">
         <ChatIcon name="chat" class="size-[30px]" />
       </div>
 
@@ -53,7 +53,7 @@ const suggestions = computed(() => [
       </p>
 
       <!-- Suggestions List -->
-      <div class="mx-auto mt-8 flex max-w-[300px] flex-col gap-[9px]">
+      <div class="mx-auto mt-8 flex max-w-[420px] flex-col gap-[9px]">
         <Button
           v-for="(item, idx) in suggestions"
           :key="idx"

@@ -70,8 +70,8 @@ defineExpose({
 </script>
 
 <template>
-  <div class="w-full px-[22px] pt-[15px] pb-[17px]">
-    <div class="mx-auto max-w-3xl">
+  <div class="w-full pt-[15px] pb-[17px]">
+    <div class="mx-auto w-[min(100cqw,max(var(--chat-content-min),var(--chat-input-width)))]">
       <!-- Hidden File Input -->
       <input
         ref="fileInputRef"
@@ -83,7 +83,7 @@ defineExpose({
       >
 
       <PromptInput
-        class="rounded-xl border bg-card px-3 pt-3 pb-2 shadow-[0_3px_10px_#24375805] transition-shadow focus-within:shadow-md"
+        class="rounded-xl border bg-card px-4 pt-4 pb-3 shadow-[0_3px_10px_#24375805] transition-shadow focus-within:shadow-md"
         @submit="handleSubmit"
       >
         <!-- Attachments Chip Area / Error Display (Inside PromptInput at top) -->
@@ -96,17 +96,17 @@ defineExpose({
             v-if="attachmentError"
             class="flex w-full items-center gap-1.5 rounded-md bg-destructive/10 px-2.5 py-1.5 text-xs text-destructive"
           >
-            <ChatIcon name="alertCircle" class="size-3.5 shrink-0" />
+            <ChatIcon name="alertCircle" class="size-(--chat-input-icon) shrink-0" />
             <span>{{ attachmentError }}</span>
             <Button
               variant="ghost"
               size="icon-xs"
-              class="ml-auto size-5 text-destructive hover:bg-destructive/20"
+              class="ml-auto size-(--chat-input-control) text-destructive hover:bg-destructive/20"
               :title="t('dismissError')"
               :aria-label="t('dismissError')"
               @click="attachmentError = null"
             >
-              <ChatIcon name="close" class="size-3" />
+              <ChatIcon name="close" class="size-(--chat-input-icon)" />
             </Button>
           </div>
 
@@ -123,7 +123,7 @@ defineExpose({
                 :alt="file.name"
                 class="size-6 rounded object-cover"
               >
-              <ChatIcon name="appDoc" v-else class="size-3.5 text-muted-foreground" />
+              <ChatIcon name="appDoc" v-else class="size-(--chat-input-icon) text-muted-foreground" />
               <span class="max-w-32 truncate text-foreground">{{ file.name }}</span>
               <span class="text-[0.8125rem] text-muted-foreground">({{ formatFileSize(file.size) }})</span>
               <button
@@ -133,7 +133,7 @@ defineExpose({
                 :aria-label="t('removeFile', { name: file.name })"
                 @click="removeAttachedFile(file.id)"
               >
-                <ChatIcon name="close" class="size-3" />
+                <ChatIcon name="close" class="size-(--chat-input-icon)" />
               </button>
             </div>
           </template>
@@ -143,7 +143,7 @@ defineExpose({
           <PromptInputTextarea
             :placeholder="props.isLoading ? t('queueInputPlaceholder') : (props.placeholder || t('composerPlaceholder'))"
             :disabled="props.disabled"
-            class="min-h-[57px] text-[0.81rem] leading-[1.7] border-0 bg-transparent px-0.5 py-px focus-visible:ring-0 flex-1"
+            class="min-h-[4.75rem] text-[0.9rem] leading-[1.7] border-0 bg-transparent px-0.5 py-[0.875rem] focus-visible:ring-0 flex-1"
             @dragover.prevent
             @drop.prevent.stop="handleDrop"
             @paste.capture="handlePaste"
@@ -152,7 +152,7 @@ defineExpose({
             ref="speechButtonRef"
             :lang="chatSession.locale.value"
             :disabled="props.disabled"
-            class="size-[26px] shrink-0 text-muted-foreground hover:text-foreground"
+            class="size-(--chat-input-control) shrink-0 text-muted-foreground hover:text-foreground"
             @recording-change="handleRecordingChange"
           />
         </div>
@@ -168,13 +168,13 @@ defineExpose({
                     type="button"
                     variant="ghost"
                     size="icon-sm"
-                    class="size-[26px] text-muted-foreground hover:text-foreground"
+                    class="size-(--chat-input-control) text-muted-foreground hover:text-foreground"
                     :disabled="props.disabled"
                     :title="t('attachFile')"
                     :aria-label="t('attachFile')"
                     @click="triggerFileInput"
                   >
-                    <ChatIcon name="paperclip" class="size-4" />
+                    <ChatIcon name="paperclip" class="size-(--chat-input-icon)" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent class="text-xs">
@@ -192,7 +192,7 @@ defineExpose({
                 :disabled="props.disabled || props.isLoading"
                 :title="activeHarness ? activeHarness.name : t('selectHarness')"
                 :aria-label="activeHarness ? activeHarness.name : t('selectHarness')"
-                class="h-7 max-w-[105px] rounded-lg border border-input bg-transparent px-1 text-[0.85rem] font-normal text-muted-foreground outline-none transition-colors hover:bg-accent hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
+                class="h-(--chat-input-control) max-w-[min(11rem,40vw)] rounded-lg border border-input bg-transparent px-1 text-[0.95rem] font-normal text-muted-foreground outline-none transition-colors hover:bg-accent hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
                 @change="handleNativeHarnessChange"
               >
                 <option v-if="!activeHarness" value="" disabled>{{ t('selectHarness') }}</option>
@@ -208,12 +208,12 @@ defineExpose({
                   >
                     <TooltipTrigger as-child>
                       <SelectTrigger
-                        class="h-7 max-w-[105px] sm:max-w-[105px] border-none bg-transparent px-1 text-[0.85rem] font-normal text-muted-foreground shadow-none hover:bg-accent hover:text-foreground"
+                        class="h-(--chat-input-control) data-[size=default]:h-(--chat-input-control) [&_svg]:size-(--chat-input-icon) max-w-[min(11rem,40vw)] border-none bg-transparent px-1 text-[0.95rem] font-normal text-muted-foreground shadow-none hover:bg-accent hover:text-foreground"
                         :title="activeHarness ? activeHarness.name : t('selectHarness')"
                         :aria-label="activeHarness ? activeHarness.name : t('selectHarness')"
                       >
                         <div class="flex items-center gap-1.5 min-w-0">
-                          <ChatIcon name="cpu" class="size-3.5 text-muted-foreground shrink-0" />
+                          <ChatIcon name="cpu" class="size-(--chat-input-icon) text-muted-foreground shrink-0" />
                           <span class="truncate">{{ activeHarness ? activeHarness.name : t('selectHarness') }}</span>
                         </div>
                       </SelectTrigger>
@@ -236,7 +236,7 @@ defineExpose({
               </TooltipProvider>
             </template>
             <div v-else class="flex items-center gap-1.5 rounded-md bg-destructive/10 px-2 py-1 text-destructive text-xs">
-              <ChatIcon name="warning" class="size-3.5 shrink-0" />
+              <ChatIcon name="warning" class="size-(--chat-input-icon) shrink-0" />
               <span>{{ t('noHarnessTitle') }}</span>
             </div>
 
@@ -247,7 +247,7 @@ defineExpose({
               :disabled="props.disabled || props.isLoading"
               :title="selectedModelDisplayLabel"
               :aria-label="selectedModelDisplayLabel"
-              class="h-7 max-w-[105px] rounded-lg border border-input bg-transparent px-1 text-[0.85rem] font-normal text-muted-foreground outline-none transition-colors hover:bg-accent hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
+              class="h-(--chat-input-control) max-w-[min(11rem,40vw)] rounded-lg border border-input bg-transparent px-1 text-[0.95rem] font-normal text-muted-foreground outline-none transition-colors hover:bg-accent hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
               @change="handleNativeModelChange"
             >
               <option v-if="!isSelectedModelListed" value="" disabled>{{ selectedModelDisplayLabel }}</option>
@@ -265,12 +265,12 @@ defineExpose({
                 >
                   <TooltipTrigger as-child>
                     <SelectTrigger
-                      class="h-7 max-w-[105px] sm:max-w-[105px] border-none bg-transparent px-1 text-[0.85rem] font-normal text-muted-foreground shadow-none hover:bg-accent hover:text-foreground"
+                      class="h-(--chat-input-control) data-[size=default]:h-(--chat-input-control) [&_svg]:size-(--chat-input-icon) max-w-[min(11rem,40vw)] border-none bg-transparent px-1 text-[0.95rem] font-normal text-muted-foreground shadow-none hover:bg-accent hover:text-foreground"
                       :title="selectedModelDisplayLabel"
                       :aria-label="selectedModelDisplayLabel"
                     >
                       <div class="flex items-center gap-1.5 min-w-0">
-                        <ChatIcon name="star" class="size-3.5 text-muted-foreground shrink-0" />
+                        <ChatIcon name="star" class="size-(--chat-input-icon) text-muted-foreground shrink-0" />
                         <span class="truncate">{{ selectedModelDisplayLabel }}</span>
                       </div>
                     </SelectTrigger>
@@ -322,15 +322,15 @@ defineExpose({
                     variant="ghost"
                     size="icon-sm"
                     :class="[
-                      'size-[26px] rounded-lg',
+                      'size-(--chat-input-control) rounded-lg',
                       props.autoRead ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-foreground',
                     ]"
                     :title="props.autoRead ? t('autoReadOn') : t('autoReadOff')"
                     :aria-label="props.autoRead ? t('autoReadOn') : t('autoReadOff')"
                     @click="emit('update:autoRead', !props.autoRead)"
                   >
-                    <ChatIcon name="volumeMax" v-if="props.autoRead" class="size-4" />
-                    <ChatIcon name="volumeOff" v-else class="size-4" />
+                    <ChatIcon name="volumeMax" v-if="props.autoRead" class="size-(--chat-input-icon)" />
+                    <ChatIcon name="volumeOff" v-else class="size-(--chat-input-icon)" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent class="text-xs">
@@ -343,7 +343,7 @@ defineExpose({
               :disabled="props.disabled"
               :title="props.isLoading ? t('addToQueue') : t('send')"
               :aria-label="props.isLoading ? t('addToQueue') : t('send')"
-              class="size-7 rounded-lg"
+              class="size-(--chat-input-control) rounded-lg"
             />
           </div>
         </PromptInputFooter>

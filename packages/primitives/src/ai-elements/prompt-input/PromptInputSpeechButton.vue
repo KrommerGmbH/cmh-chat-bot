@@ -235,7 +235,7 @@ defineExpose({
       :aria-label="t('micStop')"
       @click.stop="toggleListening"
     >
-      <ChatIcon name="stop" class="size-3 fill-current" />
+      <ChatIcon name="stop" class="size-(--chat-input-icon) fill-current" />
       <span>{{ t('micStop') }}</span>
     </button>
   </div>
@@ -250,7 +250,7 @@ defineExpose({
             :class="cn('opacity-40 cursor-not-allowed', props.class)"
             v-bind="props"
           >
-            <ChatIcon name="mic" class="size-4" />
+            <ChatIcon name="mic" class="size-(--chat-input-icon)" />
           </PromptInputButton>
         </div>
       </TooltipTrigger>
@@ -269,6 +269,6 @@ defineExpose({
     :aria-label="t('startSpeechInput')"
     @click="toggleListening"
   >
-    <ChatIcon name="mic" class="size-4" />
+    <ChatIcon name="mic" class="size-(--chat-input-icon)" />
   </PromptInputButton>
 </template>

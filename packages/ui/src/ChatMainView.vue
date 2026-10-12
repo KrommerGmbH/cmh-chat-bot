@@ -120,6 +120,7 @@ defineExpose({ sendText })
   <div
     ref="rootElement"
     class="relative flex h-full w-full overflow-hidden bg-background text-foreground"
+    :data-narrow="isNarrow ? '' : undefined"
     :data-channel="resolvedChannel"
     :data-flow-id="props.flowId ?? undefined"
   >
@@ -150,7 +151,7 @@ defineExpose({ sendText })
     />
 
     <!-- 3. Main Chat View -->
-    <div class="flex flex-1 flex-col overflow-hidden">
+    <div class="@container flex flex-1 flex-col overflow-hidden">
       <!-- Header -->
       <ChatHeader
         :selected-harness-id="selectedHarnessId"
@@ -199,16 +200,16 @@ defineExpose({ sendText })
 
           <!-- Conversation Scroll Area -->
           <ConversationContainer v-else class="flex-1 overflow-y-auto">
-          <ConversationContent class="mx-auto flex w-full max-w-[640px] flex-col gap-0 px-[25px] py-[25px]">
+          <ConversationContent class="mx-auto flex w-[min(100cqw,max(var(--chat-content-min),var(--chat-content-width)))] flex-col gap-0 px-0 py-10">
             <div
               v-for="msg in visibleMessages"
               :key="msg.id"
-              class="flex flex-col py-[14px] text-[0.9rem] leading-[1.8]"
+              class="flex flex-col py-[calc(var(--chat-gap)/2)] text-[0.95rem] leading-[1.7]"
             >
               <!-- User Message -->
               <Message v-if="msg.role === 'user'" from="user" class="w-full max-w-full flex-col gap-0">
                 <div class="mb-2 text-[0.78rem] font-bold text-primary">{{ t('messageLabelUser') }}</div>
-                <MessageContent class="w-full max-w-full rounded-xl bg-muted p-[15px] mb-[18px] text-foreground text-[0.9rem] leading-[1.8] shadow-none">
+                <MessageContent class="w-full max-w-full rounded-xl bg-muted p-5 mb-[18px] text-foreground text-[0.95rem] leading-[1.7] shadow-none [&_p]:max-w-(--chat-prose-max)">
                   <p class="whitespace-pre-wrap">{{ msg.content }}</p>
 
                   <!-- Attached Files Chips -->
@@ -454,14 +455,14 @@ defineExpose({ sendText })
       <div
         v-if="runError"
         role="alert"
-        class="mx-auto w-full max-w-3xl px-3 pt-2 text-xs text-destructive whitespace-pre-wrap break-words"
+        class="mx-auto w-[min(100cqw,max(var(--chat-content-min),var(--chat-input-width)))] pt-2 text-xs text-destructive whitespace-pre-wrap break-words"
       >
         {{ t('runFailed') }} — {{ runError }}
       </div>
       <div
         v-else-if="sendError"
         role="alert"
-        class="mx-auto w-full max-w-3xl px-3 pt-2 text-xs text-destructive whitespace-pre-wrap break-words"
+        class="mx-auto w-[min(100cqw,max(var(--chat-content-min),var(--chat-input-width)))] pt-2 text-xs text-destructive whitespace-pre-wrap break-words"
       >
         {{ t('runFailed') }} — {{ sendError }}
       </div>

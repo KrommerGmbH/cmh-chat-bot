@@ -30,7 +30,7 @@ const {
 </script>
 
 <template>
-  <div class="my-3 max-w-lg">
+  <div class="my-3 w-full">
     <EditableApproval
       :approval-id="approvalId"
       :initial-text="text"

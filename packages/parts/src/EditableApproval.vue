@@ -47,7 +47,7 @@ const {
 </script>
 
 <template>
-  <div class="my-3 w-full min-w-0 max-w-lg rounded-xl border border-primary/20 bg-card p-3 shadow-2xs">
+  <div class="my-3 w-full min-w-0 rounded-xl border border-primary/20 bg-card p-5 shadow-2xs">
     <!-- Header -->
     <div class="mb-2 flex items-start justify-between gap-2">
       <div class="flex items-center gap-1.5 text-xs font-semibold text-foreground">

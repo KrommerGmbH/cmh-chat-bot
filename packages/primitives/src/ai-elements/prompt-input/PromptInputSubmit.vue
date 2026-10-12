@@ -36,9 +36,9 @@ const icon = computed(() => {
 
 const iconClass = computed(() => {
   if (props.status === 'submitted') {
-    return 'size-4 animate-spin'
+    return 'size-(--chat-input-icon) animate-spin'
   }
-  return 'size-4'
+  return 'size-(--chat-input-icon)'
 })
 
 const { status, size, variant, class: _, ...restProps } = props

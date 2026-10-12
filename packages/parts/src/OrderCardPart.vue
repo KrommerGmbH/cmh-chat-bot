@@ -24,8 +24,8 @@ const {
   <div v-else-if="failed || !orderData" class="my-2 rounded border border-destructive/20 bg-destructive/5 px-3 py-2 text-xs text-destructive">
     불러오지 못했습니다
   </div>
-  <Card v-else class="my-2 max-w-sm border shadow-2xs">
-    <CardHeader class="p-3 pb-2">
+  <Card v-else class="my-2 w-full border shadow-2xs">
+    <CardHeader class="p-5 pb-2">
       <div class="flex items-center justify-between gap-2">
         <div class="flex items-center gap-1.5 text-muted-foreground text-xs font-medium">
           <ChatIcon name="marketHub" class="size-3.5 text-primary" />
@@ -40,7 +40,7 @@ const {
         {{ orderData.orderNumber }}
       </CardTitle>
     </CardHeader>
-    <CardContent class="grid grid-cols-2 gap-2 p-3 pt-0 text-xs">
+    <CardContent class="grid grid-cols-2 gap-2 p-5 pt-0 text-xs">
       <div class="flex flex-col gap-0.5 rounded bg-muted/40 p-2">
         <span class="text-muted-foreground text-[10px]">{{ t('orderAmount') }}</span>
         <span class="font-bold text-foreground">

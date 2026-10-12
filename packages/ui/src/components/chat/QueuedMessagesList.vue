@@ -30,7 +30,7 @@ function formatFileSize(bytes: number): string {
 <template>
   <div
     v-if="props.items.length > 0"
-    class="mx-auto w-full max-w-3xl px-3 mb-2.5 animate-in fade-in slide-in-from-bottom-2 duration-200"
+    class="mx-auto w-[min(100cqw,max(var(--chat-content-min),var(--chat-input-width)))] mb-2.5 animate-in fade-in slide-in-from-bottom-2 duration-200"
   >
     <div
       class="rounded-xl border border-primary/20 bg-card/85 p-3 shadow-md backdrop-blur-md dark:bg-card/75 dark:border-primary/25"

@@ -59,7 +59,7 @@ const {
 </script>
 
 <template>
-  <div class="my-3 max-w-lg">
+  <div class="my-3 w-full">
     <EditableApproval
       v-if="editableText !== null && !isMulti"
       :approval-id="effectiveId"

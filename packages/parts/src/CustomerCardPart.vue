@@ -23,8 +23,8 @@ const {
   <div v-else-if="failed || !customerData" class="my-2 rounded border border-destructive/20 bg-destructive/5 px-3 py-2 text-xs text-destructive">
     불러오지 못했습니다
   </div>
-  <Card v-else class="my-2 max-w-sm border shadow-2xs">
-    <CardHeader class="p-3 pb-2">
+  <Card v-else class="my-2 w-full border shadow-2xs">
+    <CardHeader class="p-5 pb-2">
       <div class="flex items-center justify-between gap-2">
         <div class="flex items-center gap-1.5 text-muted-foreground text-xs font-medium">
           <ChatIcon name="user" class="size-3.5 text-primary" />
@@ -38,7 +38,7 @@ const {
         {{ customerData.name || customerData.customerNumber }}
       </CardTitle>
     </CardHeader>
-    <CardContent class="p-3 pt-0 text-xs">
+    <CardContent class="p-5 pt-0 text-xs">
       <div v-if="customerData.email" class="flex items-center gap-2 rounded bg-muted/40 p-2 text-muted-foreground">
         <ChatIcon name="appMail" class="size-3.5 shrink-0" />
         <span class="truncate">{{ customerData.email }}</span>

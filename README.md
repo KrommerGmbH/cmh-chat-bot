@@ -57,6 +57,20 @@ A host that imports `ChatMainView` (or `ChatDockPanel` / `ChatCanvasDrawer`) dir
 - Add the Tailwind `@source` lines shown above.
 - Remember that `client`, `host` and `transport` are read once at setup (remount to swap them). `flowId` is reactive.
 
+### Layout variables
+
+`@cmh/chat-primitives/theme.css` sets these CSS variables on `html`. A host overrides them on any ancestor of the chat view to change widths and icon sizes. In a narrow view (`data-narrow`, set by the view; or `data-channel="mobile"`) both widths become `calc(100cqw - 2rem)`.
+
+| Variable | Default | Meaning |
+| --- | --- | --- |
+| `--chat-content-width` | `76cqw` | Width of the conversation area (approval cards and AI answer components) as a share of the chat column (container query unit, so the scrollbar does not shift it). |
+| `--chat-content-min` | `20rem` | Floor of that width. A window narrower than this uses 100%. |
+| `--chat-prose-max` | `46rem` | Line length limit for body text only (paragraph, list, quote, heading). Tables, code, cards and approval cards ignore it. |
+| `--chat-input-width` | `76cqw` | Width of the input box. Keep it equal to `--chat-content-width` so the left and right edges line up. |
+| `--chat-input-icon` | `max(1.25rem, 20px)` | Edge of every icon inside the input box. |
+| `--chat-input-control` | `max(2.25rem, 36px)` | Height of buttons and select fields inside the input box (touch target). |
+| `--chat-gap` | `2.5rem` | Space between two messages. |
+
 ## Mobile app (iframe)
 
 The mobile app embeds the bundle as an iframe page and copies the build output of `pnpm build:bundle` from `apps/standalone-bundle/dist-relative` (base `./`, relative asset URLs) into its own web folder. Open it with `?mode=mobile`.

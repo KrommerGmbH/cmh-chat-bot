@@ -64,6 +64,27 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
+/*
+ * Layout tokens (the host may override them on any ancestor).
+ * Selector is `html`, not `:root`: theme.contrast.test.ts counts the `:root` blocks as palettes.
+ */
+html {
+  --chat-content-width: 76cqw;
+  --chat-content-min: 20rem;
+  --chat-prose-max: 46rem;
+  --chat-input-width: 76cqw;
+  --chat-input-icon: max(1.25rem, 20px);
+  --chat-input-control: max(2.25rem, 36px);
+  --chat-gap: 2.5rem;
+}
+
+/* Narrow view (dock panel, canvas drawer, mobile iframe, narrow window): full width minus a 1rem gutter on each side. */
+[data-narrow],
+[data-channel="mobile"] {
+  --chat-content-width: calc(100cqw - 2rem);
+  --chat-input-width: calc(100cqw - 2rem);
+}
+
 /* Default tokens (used when no data-palette is set). */
 :root,
 :root[data-theme="light"] {
